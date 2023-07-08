@@ -141,7 +141,7 @@ export default function ConverterForm(props: {
 
             <p id="total" className="mt-1 text-lg font-bold text-gray-700">
                 {convertedData.source} {convertedData.amount} = <span
-                className="text-indigo-600">{convertedData.total}</span>{convertedData.target}
+                className="text-indigo-600">{convertedData.total}</span> {convertedData.target}
             </p>
 
             <button

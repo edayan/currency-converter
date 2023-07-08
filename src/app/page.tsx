@@ -1,14 +1,12 @@
 import CurrencyConverterWrapper from "@/components/CurrencyConverterWrapper";
 import {ICurrencyExchangeRate, ICurrencyExchangeResponse, ICurrencyRate} from "@/interfaces";
+import {acceptedCurrencies} from "@/data/constants";
 
 function mapCurrencyToValue(acceptedCurrencies: ({ value: string; key: string })[], currency: string) {
     return (acceptedCurrencies.find(({key}) => key === currency)?.value) || 'EMPTY';
 }
 
-function mapExchangeRateToCurrencyRate(filteredRate: [string, ICurrencyExchangeRate], acceptedCurrencies: ({
-    value: string;
-    key: string
-})[]) {
+function mapExchangeRateToCurrencyRate(filteredRate: [string, ICurrencyExchangeRate]) {
     const currency = filteredRate[0];
     return ({
         currency: currency,
@@ -17,17 +15,11 @@ function mapExchangeRateToCurrencyRate(filteredRate: [string, ICurrencyExchangeR
     }) as ICurrencyRate;
 }
 
-function filterToAcceptedCurrencies(response: ICurrencyExchangeResponse) {
-    const acceptedCurrencies = [
-        {key: 'USD', value: 'US Dollars'},
-        {key: 'EUR', value: 'Euro'},
-        {key: 'INR', value: 'Indian Rupee'},
-        {key: 'JPY', value: 'Japanese Yen'}]; // TODO: Avoid filter after better ui
-
+function filterCurrencies(response: ICurrencyExchangeResponse):ICurrencyRate[] {
     const rates = response.rates as ICurrencyExchangeRate[];
     return Object.entries(rates)
         .filter(([currency]) => acceptedCurrencies.some(({key}) => key === currency))
-        .map((filteredRate) => mapExchangeRateToCurrencyRate(filteredRate, acceptedCurrencies));
+        .map((filteredRate) => mapExchangeRateToCurrencyRate(filteredRate));
 }
 
 async function getExchangeRates(): Promise<{ rate: number; currency: string; value: string }[]> {
@@ -41,7 +33,7 @@ async function getExchangeRates(): Promise<{ rate: number; currency: string; val
         throw new Error('Error in getting latest exchange rate!');
     }
 
-    return filterToAcceptedCurrencies(await res.json() as ICurrencyExchangeResponse);
+    return filterCurrencies(await res.json() as ICurrencyExchangeResponse);
 }
 
 
