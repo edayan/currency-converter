@@ -41,6 +41,10 @@ export default function ConverterForm(props: {
     }, [props.onCurrencyConverted]);
 
     useEffect(() => {
+        if (!total) {
+            return; // Don't need to add to history if converted 0.
+        }
+
         const convertedData: IConvertedData = {
             source: selectedSource,
             target: selectedTarget,
@@ -49,8 +53,7 @@ export default function ConverterForm(props: {
         };
         setConvertedData(convertedData);
         handleCurrencyConverted(convertedData);
-    }, [total, handleCurrencyConverted]);
-
+    }, [total]);
 
 
     const handleConvert = (event: React.FormEvent<HTMLFormElement>) => {

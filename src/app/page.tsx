@@ -15,7 +15,7 @@ function mapExchangeRateToCurrencyRate(filteredRate: [string, ICurrencyExchangeR
     }) as ICurrencyRate;
 }
 
-function filterCurrencies(response: ICurrencyExchangeResponse):ICurrencyRate[] {
+function filterCurrencies(response: ICurrencyExchangeResponse): ICurrencyRate[] {
     const rates = response.rates as ICurrencyExchangeRate[];
     return Object.entries(rates)
         .filter(([currency]) => acceptedCurrencies.some(({key}) => key === currency))
@@ -38,17 +38,16 @@ async function getExchangeRates(): Promise<{ rate: number; currency: string; val
 
 
 export default async function Home() {
-    const data = await getExchangeRates();
-    if (!data) {
+    try {
+        const data = await getExchangeRates();
+        return (
+            <main className="flex min-h-screen flex-col items-center justify-between p-24">
+                <CurrencyConverterWrapper rates={data}/>
+            </main>
+        )
+    } catch (e) {
         return <main className="flex min-h-screen flex-col items-center justify-between p-24">
             <p>Service not available</p>
         </main>
     }
-
-    console.log(data);
-    return (
-        <main className="flex min-h-screen flex-col items-center justify-between p-24">
-            <CurrencyConverterWrapper rates={data}/>
-        </main>
-    )
 }
