@@ -1,71 +1,62 @@
-export default function Home() {
+import CurrencyConverterWrapper from "@/components/CurrencyConverterWrapper";
+import {ICurrencyExchangeRate, ICurrencyExchangeResponse, ICurrencyRate} from "@/interfaces";
+
+function mapCurrencyToValue(acceptedCurrencies: ({ value: string; key: string })[], currency: string) {
+    return (acceptedCurrencies.find(({key}) => key === currency)?.value) || 'EMPTY';
+}
+
+function mapExchangeRateToCurrencyRate(filteredRate: [string, ICurrencyExchangeRate], acceptedCurrencies: ({
+    value: string;
+    key: string
+})[]) {
+    const currency = filteredRate[0];
+    return ({
+        currency: currency,
+        value: mapCurrencyToValue(acceptedCurrencies, currency),
+        rate: Number(filteredRate[1]) as number
+    }) as ICurrencyRate;
+}
+
+function filterToAcceptedCurrencies(response: ICurrencyExchangeResponse) {
+    const acceptedCurrencies = [
+        {key: 'USD', value: 'US Dollars'},
+        {key: 'EUR', value: 'Euro'},
+        {key: 'INR', value: 'Indian Rupee'},
+        {key: 'JPY', value: 'Japanese Yen'}]; // TODO: Avoid filter after better ui
+
+    const rates = response.rates as ICurrencyExchangeRate[];
+    return Object.entries(rates)
+        .filter(([currency]) => acceptedCurrencies.some(({key}) => key === currency))
+        .map((filteredRate) => mapExchangeRateToCurrencyRate(filteredRate, acceptedCurrencies));
+}
+
+async function getExchangeRates(): Promise<{ rate: number; currency: string; value: string }[]> {
+    const res = await fetch(`https://openexchangerates.org/api/latest.json?app_id=${process.env.OPEN_EXCHANGE_RATES_APP_ID}`, {
+        next: {
+            revalidate: 30
+        }
+    });
+
+    if (!res.ok) {
+        throw new Error('Error in getting latest exchange rate!');
+    }
+
+    return filterToAcceptedCurrencies(await res.json() as ICurrencyExchangeResponse);
+}
+
+
+export default async function Home() {
+    const data = await getExchangeRates();
+    if (!data) {
+        return <main className="flex min-h-screen flex-col items-center justify-between p-24">
+            <p>Service not available</p>
+        </main>
+    }
+
+    console.log(data);
     return (
         <main className="flex min-h-screen flex-col items-center justify-between p-24">
-            <form>
-                <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-9">
-                    <div className="sm:col-span-3">
-                        <label htmlFor="source" className="block text-sm font-medium leading-6 text-gray-900">
-                            From
-                        </label>
-                        <div className="mt-2">
-                            <select
-                                id="source"
-                                name="source"
-                                autoComplete="country-name"
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
-                            >
-                                <option>US dollars</option>
-                                <option>Euros</option>
-                                <option>Japanese Yen</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="sm:col-span-3">
-                        <label htmlFor="amount" className="block text-sm font-medium leading-6 text-gray-900">
-                            Amount
-                        </label>
-                        <div className="mt-2">
-                            <input
-                                type="text"
-                                name="amount"
-                                id="last-name"
-                                autoComplete="amount"
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="sm:col-span-3">
-                        <label htmlFor="target" className="block text-sm font-medium leading-6 text-gray-900">
-                            To
-                        </label>
-                        <div className="mt-2">
-                            <select
-                                id="target"
-                                name="target"
-                                autoComplete="country-name"
-                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
-                            >
-                                <option>US dollars</option>
-                                <option>Euros</option>
-                                <option>Japanese Yen</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div className="mt-6 flex items-center justify-between gap-x-6">
-                    <p className="mt-1 text-lg font-bold text-gray-700">
-                        Result: <span className="text-indigo-600">Total here</span>
-                    </p>
-                    <button
-                        type="submit"
-                        className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 "
-                    >
-                        Convert
-                    </button>
-                </div>
-            </form>
+            <CurrencyConverterWrapper rates={data}/>
         </main>
     )
 }
