@@ -25,6 +25,10 @@ export default function CurrencyConverterWrapper(props: { rates: ICurrencyRate[]
 
     return <div>
         <ConverterForm rates={props.rates} onCurrencyConverted={currencyConvertedHandler}/>
-        {convertedCurrencies.length > 0 && <ConversionHistory history={convertedCurrencies}/>}
+        {convertedCurrencies.length > 0 &&
+            <div className="mt-12"><h3 className="text-2xl font-bold mb-4">Previous conversions</h3><ConversionHistory
+                history={convertedCurrencies}/>
+            </div>
+        }
     </div>;
 }

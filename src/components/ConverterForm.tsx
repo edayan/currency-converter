@@ -7,6 +7,35 @@ function convertAmountFromSourceToTarget(sourceRateValue: number, targetRateValu
     return convertedValue.toFixed(2);
 }
 
+function ConversionInfo(props: { convertedData: IConvertedData }) {
+    if (!props.convertedData.total) {
+        return;
+    }
+
+    return <p id="total" className="mt-1 text-lg font-bold text-gray-700">
+        {props.convertedData.source} {props.convertedData.amount} = <span
+        className="text-indigo-600">{props.convertedData.total}</span> {props.convertedData.target}
+    </p>;
+}
+
+
+function BaseRate(props: { rates: ICurrencyRate[], selectedSource: string, selectedTarget: string }) {
+    const source = props.rates.find((rate) => rate.currency === props.selectedSource);
+    const target = props.rates.find((rate) => rate.currency === props.selectedTarget);
+
+    if (!source?.rate || !target?.rate) {
+        return null;
+    }
+
+    return (
+        <p className="mt-1 text-sm font-bold text-gray-700">
+            1 {source.value} ({source.currency}) is equivalent
+            to {convertAmountFromSourceToTarget(source.rate, target.rate, 1)} {target.currency} ({target.currency})
+        </p>
+    );
+}
+
+
 export default function ConverterForm(props: {
     rates: ICurrencyRate[],
     onCurrencyConverted: (convertedData: IConvertedData) => void
@@ -70,17 +99,6 @@ export default function ConverterForm(props: {
         setTotal(parseFloat(convertAmountFromSourceToTarget(sourceRate.rate, targetRate.rate, amount)));
     };
 
-    const getBaseRate = () => {
-        const source = props.rates.find((rate) => rate.currency === selectedSource);
-        const target = props.rates.find((rate) => rate.currency === selectedTarget);
-
-        if (!source?.rate || !target?.rate) {
-            return ""
-        }
-
-        return `1 ${source.currency} is equivalent to ${convertAmountFromSourceToTarget(source.rate, target.rate, 1)} ${target.currency}`;
-    };
-
     return <form onSubmit={handleConvert}>
         <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-9">
             <div className="sm:col-span-3">
@@ -113,7 +131,7 @@ export default function ConverterForm(props: {
                         autoComplete="amount"
                         value={amount}
                         onChange={handleAmountChange}
-                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 text-center"
                     />
                 </div>
             </div>
@@ -137,22 +155,20 @@ export default function ConverterForm(props: {
             </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-x-6">
-            <p id="base-rate" className="mt-1 text-md font-bold text-gray-700">
-                {getBaseRate()}
-            </p>
+        <div className="mt-6">
+            <div id="info" className="mb-4">
+                <BaseRate rates={props.rates} selectedSource={selectedSource} selectedTarget={selectedTarget}/>
+            </div>
 
-            <p id="total" className="mt-1 text-lg font-bold text-gray-700">
-                {convertedData.source} {convertedData.amount} = <span
-                className="text-indigo-600">{convertedData.total}</span> {convertedData.target}
-            </p>
-
-            <button
-                type="submit"
-                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-                Convert
-            </button>
+            <div id="result" className="flex justify-end">
+                <ConversionInfo convertedData={convertedData}/>
+                <button
+                    type="submit"
+                    className="ml-4 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                    Convert
+                </button>
+            </div>
         </div>
 
     </form>;
