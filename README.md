@@ -7,11 +7,10 @@ This uses [openexchangerates.org](https://openexchangerates.org)
 First, run the development server:
 
 ```bash
+npm install
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -27,3 +26,11 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 1. Run your container: `docker run -p 3000:3000 currency_conveter`
 
 You can view your images created with `docker images`
+
+
+### Running Tests
+```bash
+npm install
+ 
+npm run e2e
+```

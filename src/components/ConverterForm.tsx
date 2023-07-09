@@ -127,7 +127,7 @@ export default function ConverterForm(props: {
                     <input
                         type="text"
                         name="amount"
-                        id="last-name"
+                        id="amount"
                         autoComplete="amount"
                         value={amount}
                         onChange={handleAmountChange}
