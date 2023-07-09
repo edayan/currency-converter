@@ -2,7 +2,7 @@ import CurrencyConverterWrapper from "@/components/CurrencyConverterWrapper";
 import {ICurrencyExchangeRate, ICurrencyExchangeResponse, ICurrencyRate} from "@/interfaces";
 import {acceptedCurrencies} from "@/data/constants";
 
-function mapCurrencyToValue(acceptedCurrencies: ({ value: string; key: string })[], currency: string) {
+function mapCurrencyToValue(currency: string) {
     return (acceptedCurrencies.find(({key}) => key === currency)?.value) || 'EMPTY';
 }
 
@@ -10,7 +10,7 @@ function mapExchangeRateToCurrencyRate(filteredRate: [string, ICurrencyExchangeR
     const currency = filteredRate[0];
     return ({
         currency: currency,
-        value: mapCurrencyToValue(acceptedCurrencies, currency),
+        value: mapCurrencyToValue(currency),
         rate: Number(filteredRate[1]) as number
     }) as ICurrencyRate;
 }
